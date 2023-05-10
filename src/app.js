@@ -8,8 +8,10 @@ domain = domain
 chrome.runtime.sendMessage(
   { command: 'fetch', data: { domain: domain } },
   (response) => {
-    parseCoupons(response.data, domain)
+    for (var key in response.data) {
+      var coupon = response.data[key]
+      console.log(coupon.code)
+    }
+    console.log()
   },
 )
-
-console.log(domain)
