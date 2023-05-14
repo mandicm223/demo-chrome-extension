@@ -60,15 +60,27 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
   if (msg.command == 'post') {
     var domain = msg.data.domain
     var enc_domain = btoa(domain)
-    var code = '456'
-    var desc = '456'
+    var currentdate = new Date()
+    var datetime =
+      'Date: ' +
+      currentdate.getDate() +
+      '/' +
+      (currentdate.getMonth() + 1) +
+      '/' +
+      currentdate.getFullYear() +
+      ' @ ' +
+      currentdate.getHours() +
+      ':' +
+      currentdate.getMinutes() +
+      ':' +
+      currentdate.getSeconds()
 
     try {
       const db = getDatabase(firebase)
       const postId = push(child(ref(db), '/domain/' + enc_domain)).key
       update(ref(db, '/domain/' + enc_domain + '/' + postId), {
-        code: code,
-        description: desc,
+        datetime,
+        domain,
       })
         .then(() => {
           //return response
@@ -94,5 +106,31 @@ chrome.runtime.onMessage.addListener((msg, sender, response) => {
       response({ type: 'result', status: 'error', data: e, request: msg })
     }
   }
+  if (msg.command == 'options') {
+    chrome.storage.local.get(['data'], function (result) {
+      var newData = {
+        domainName: msg.domainName,
+        favicon: msg.favicon,
+        timestamp: msg.timestamp,
+        url: msg.url,
+      }
+      var data = result.data || []
+      data.push(newData)
+      chrome.storage.local.set({ data: data })
+    })
+  }
+  // if (msg.command == 'reset') {
+  //   chrome.storage.local.get(['resetData'], function (result) {
+  //     var newData = {
+  //       domainName: msg.domainName,
+  //       favicon: msg.favicon,
+  //       timestamp: msg.timestamp,
+  //     }
+  //     var resetData = []
+  //     resetData.push(newData)
+  //     chrome.storage.local.set({ resetData: resetData })
+  //   })
+  // }
+
   return true
 })
